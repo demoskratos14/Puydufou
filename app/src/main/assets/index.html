@@ -45,6 +45,8 @@ a.show.must{background:var(--hi)}
 h2{font-size:15px;margin:16px 2px 8px;color:var(--mut)}
 .sc{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;padding:10px}
 .sc.must{background:var(--hi)}
+.sc.done{opacity:.55}
+.sc.done .nmx{text-decoration:line-through}
 .sh{display:flex;align-items:center;gap:8px}
 .nmx{flex:1;min-width:0;color:var(--ink);text-decoration:none;font-weight:600}
 .nmx small{display:block;color:var(--mut);font-weight:400;font-size:13px}
@@ -126,7 +128,7 @@ var MARGIN=30;
 var DUR={signe:35,vikings:26,bal:33,lance:29,mousq:32,panache:34,mime:28,renaissance:30,epee:22,royaume:18,automates:7,carillon:10,eaux:8,frairie:32,perouse:20,verdun:15,noces:30};
 // Samedi 3 oct : programme officiel (édité à 09h18). Dimanche : relevé sur la frise horaire du site (Noces de Feu non listées). "a-b" = visite libre de a à b.
 var HOR={sam:{signe:["11:30","15:00"],vikings:["10:30","12:30","15:45","17:15"],bal:["10:45","13:15","14:45","16:15"],lance:["10:15","14:00","16:00"],mousq:["11:30","12:45","16:45","18:00"],panache:["11:00","12:15","15:30","17:15","18:30"],mime:["09:45","12:45","14:00","16:45","18:00"],renaissance:["09:30-11:45"],epee:["10:00","11:15","13:30","14:30","15:30","17:00"],royaume:["11:00-18:00"],automates:["09:45","10:30","14:00","19:15"],carillon:["11:30","14:15","16:30","18:15","19:00"],eaux:["10:00","13:00","14:00"],frairie:["16:00","17:00","19:00","20:00"],perouse:["11:45-20:00"],verdun:["10:30-19:00"],noces:["21:30"]},
-dim:{signe:["14:00"],vikings:["10:45","12:10","14:55"],bal:["10:30","13:20","16:05"],lance:["12:10","15:10"],mousq:["13:05","16:45","17:55"],panache:["10:05","11:15","14:00"],mime:["11:00","15:50","17:00"],renaissance:["09:25-11:30"],epee:["09:50","11:55","15:25","16:20"],royaume:["10:45-16:45"],automates:["09:35","13:30","17:25"],carillon:["11:30","13:45","16:30"],eaux:["09:50","12:35","13:30"],frairie:["15:35","16:30","17:25"],perouse:["11:15-17:15"],verdun:["11:40-17:15"]}};
+dim:{signe:["14:30"],vikings:["11:00","12:30","15:30"],bal:["10:45","13:45","16:45"],lance:["12:30","15:45"],mousq:["13:30","17:30","18:45"],panache:["10:15","11:30","14:30"],mime:["11:15","16:30","17:45"],renaissance:["09:30-11:45"],epee:["10:00","12:15","16:00","17:00"],royaume:["11:00-17:30"],automates:["09:45","14:00","18:15"],carillon:["11:45","14:15","17:15"],eaux:["10:00","13:00","14:00"],frairie:["16:15","17:15","18:15"],perouse:["11:30-18:00"],verdun:["12:00-18:00"]}};
 // Liens directs vers les pages des spectacles (champ w dans SH).
 function web(k){var s=SH[k];return s.w||"https://www.google.com/search?q="+encodeURIComponent("site:puydufou.com "+s.n+" spectacle")}
 var PLAN=[
@@ -140,12 +142,12 @@ var PLAN=[
  {id:"s8",d:"sam",t:"18:00",k:"mousq",u:32},
  {id:"s9",d:"sam",t:"19:00",k:"frairie",u:32,o:"option (ou 20:00)"},
  {id:"s10",d:"sam",t:"21:30",k:"noces",u:30},
- {id:"d1",d:"dim",t:"09:25",k:"renaissance",u:30,o:"visite libre jusqu'à 11:30"},
- {id:"d2",d:"dim",t:"10:05",k:"panache",u:34},
- {id:"d3",d:"dim",t:"11:00",k:"mime",u:28},
- {id:"d4",d:"dim",t:"12:10",k:"lance",u:29},
- {id:"d6",d:"dim",t:"13:05",k:"mousq",u:32,o:"second passage, option"},
- {id:"d5",d:"dim",t:"13:45",n:"Déjeuner",u:30},
+ {id:"d1",d:"dim",t:"09:30",k:"renaissance",u:30,o:"visite libre jusqu'à 11:45"},
+ {id:"d2",d:"dim",t:"10:15",k:"panache",u:34},
+ {id:"d3",d:"dim",t:"11:15",k:"mime",u:28},
+ {id:"d4",d:"dim",t:"12:30",k:"lance",u:29},
+ {id:"d6",d:"dim",t:"13:30",k:"mousq",u:32,o:"second passage, option"},
+ {id:"d5",d:"dim",t:"14:05",n:"Déjeuner",u:30},
  {id:"d7",d:"dim",t:"15:30",n:"Départ du parc au plus tard",u:30}
 ];
 function mm(s){var a=s.split(":");return +a[0]*60+ +a[1]}
@@ -178,9 +180,11 @@ function draw(){
  var h="";
  if(tab===1){
   h+=daysBar();
-  Object.keys(SH).sort(function(a,b){return (SH[b].m||0)-(SH[a].m||0)}).forEach(function(k){
-   var s=SH[k];
-   h+='<div class="sc'+(s.m?' must':'')+'"><div class="sh"><a class="nmx" href="'+web(k)+'" target="_blank" rel="noopener">'+(s.m?'★ ':'')+esc(s.n)+'<small>Page sur puydufou.com</small></a><div class="act"><a href="'+route(k)+'" target="_blank" rel="noopener" title="Itinéraire">🧭</a><button data-hr="'+k+'" title="Horaires">🕒</button></div></div>';
+  var ks=Object.keys(SH),nd=ks.filter(function(k){return has(ST.done,'v-'+k)}).length,mr=ks.filter(function(k){return SH[k].m&&!has(ST.done,'v-'+k)}).length;
+  h+='<p class="note">Vus : '+nd+' / '+ks.length+' · incontournables restants : '+mr+'</p>';
+  ks.sort(function(a,b){return (has(ST.done,'v-'+a)?1:0)-(has(ST.done,'v-'+b)?1:0)||(SH[b].m||0)-(SH[a].m||0)}).forEach(function(k){
+   var s=SH[k],dn=has(ST.done,'v-'+k);
+   h+='<div class="sc'+(s.m?' must':'')+(dn?' done':'')+'"><div class="sh"><a class="nmx" href="'+web(k)+'" target="_blank" rel="noopener">'+(s.m?'★ ':'')+esc(s.n)+'<small>Page sur puydufou.com</small></a><div class="act"><a href="'+route(k)+'" target="_blank" rel="noopener" title="Itinéraire">🧭</a><button data-hr="'+k+'" title="Horaires">🕒</button><button class="ok'+(dn?' on':'')+'" data-ok="v-'+k+'" title="Vu">✓</button></div></div>';
    if(opn===k){
     var hs=(HOR[day]||{})[k];
     if(!hs)h+='<p class="sub">Horaires du '+(day==="sam"?"samedi":"dimanche")+' non renseignés.</p>';
@@ -188,7 +192,7 @@ function draw(){
    }
    h+='</div>';
   });
-  h+='<p class="note">★ = vos incontournables. Le nom ouvre la page du spectacle sur puydufou.com, 🧭 l\'itinéraire à pied, 🕒 les horaires. Samedi : programme officiel édité à 09h18. Dimanche : horaires lus sur la frise horaire du site, à quelques minutes près.</p>';
+  h+='<p class="note">★ = vos incontournables. Le nom ouvre la page du spectacle sur puydufou.com, 🧭 l\'itinéraire à pied, 🕒 les horaires, ✓ pour cocher un spectacle vu (les vus passent en bas de liste). Samedi : programme officiel édité à 09h18. Dimanche : horaires lus sur la frise horaire du site, à quelques minutes près.</p>';
  } else if(tab===3){
   var L=PLACES.map(function(p){var c=pc(p);return {p:p,d:(me&&c)?hav(me,c):null,ex:!!(ST.pos&&ST.pos[p.id])}});
   if(me)L.sort(function(x,y){if(x.d===null&&y.d===null)return 0;if(x.d===null)return 1;if(y.d===null)return -1;return x.d-y.d});
