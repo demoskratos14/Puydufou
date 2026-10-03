@@ -89,7 +89,13 @@ var PLACES=[
  {id:"p-fort",n:"Saint-Philbert-le-Vieil",s:"Ancien Fort de l'An Mil",w:"https://www.puydufou.com/france/fr/saint-philbert-le-vieil",c:[46.8865132,-0.9293841]},
  {id:"p-cite",n:"Font-Rognou",s:"Ancienne Cité Médiévale : bâtiments et métiers du Moyen Âge",w:"https://www.puydufou.com/france/fr/font-rognou"},
  {id:"p-village",n:"Chasseloup",s:"Ancien Village XVIIIe siècle",w:"https://www.puydufou.com/france/fr/chasseloup"},
- {id:"p-bourg",n:"Le Bourg Bérard",s:"Ancien Bourg 1900",w:"https://www.puydufou.com/france/fr/le-bourg-berard"}
+ {id:"p-bourg",n:"Le Bourg Bérard",s:"Ancien Bourg 1900",w:"https://www.puydufou.com/france/fr/le-bourg-berard"},
+ {id:"p-h-grand",n:"Le Grand Siècle",s:"Hôtel 4★ inspiré du Château de Marly (Louis XIV)",q:"Hôtel Le Grand Siècle Puy du Fou",h:1},
+ {id:"p-h-citadelle",n:"La Citadelle",s:"Hôtel 3★ en château-fort médiéval",q:"Hôtel La Citadelle Puy du Fou",h:1},
+ {id:"p-h-villa",n:"La Villa Gallo-Romaine",s:"Hôtel 3★ historique (2007), style Antiquité",q:"Hôtel La Villa Gallo-Romaine Puy du Fou",h:1},
+ {id:"p-h-clovis",n:"Les Îles de Clovis",s:"Huttes sur pilotis, village lacustre",q:"Hôtel Les Îles de Clovis Puy du Fou",h:1},
+ {id:"p-h-drap",n:"Le Camp du Drap d'Or",s:"Hôtel 3★ Renaissance, logeries colorées",q:"Hôtel Le Camp du Drap d'Or Puy du Fou",h:1},
+ {id:"p-h-lescure",n:"Le Logis de Lescure",s:"Hôtel de la Cité Nocturne",q:"Hôtel Le Logis de Lescure Puy du Fou",h:1}
 ];
 var me=null,geo="";
 function hav(a,b){var R=6371000,r=Math.PI/180,dl=(b[0]-a[0])*r,dg=(b[1]-a[1])*r,x=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(dg/2)*Math.sin(dg/2);return 2*R*Math.asin(Math.sqrt(x))}
@@ -98,8 +104,8 @@ function getPos(cb){if(!navigator.geolocation){geo="err";draw();return}
  geo="wait";draw();
  navigator.geolocation.getCurrentPosition(function(g){me=[g.coords.latitude,g.coords.longitude];geo="ok";if(cb)cb(me);draw()},function(){geo="err";draw()},{enableHighAccuracy:true,timeout:10000,maximumAge:0})}
 function fd(m){return m<1000?Math.max(10,Math.round(m/10)*10)+" m":(m/1000).toFixed(1)+" km"}
-function placeRoute(p){return "https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent("Puy du Fou "+p.n)+"&travelmode=walking"}
-function placeWeb(p){return p.w||"https://www.google.com/search?q="+encodeURIComponent("site:puydufou.com "+p.n)}
+function placeRoute(p){return "https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(p.q||("Puy du Fou "+p.n))+"&travelmode=walking"}
+function placeWeb(p){return p.w||"https://www.google.com/search?q="+encodeURIComponent("site:puydufou.com "+(p.q||p.n))}
 var MARGIN=20;
 var DUR={signe:35,vikings:26,bal:33,lance:29,mousq:32,panache:34,mime:28,renaissance:30,epee:22,royaume:18,automates:7,carillon:10,eaux:8,frairie:32,perouse:20,verdun:15,noces:30};
 // Samedi 3 oct : programme officiel (édité à 09h18). Dimanche : relevé sur la frise horaire du site (Noces de Feu non listées). "a-b" = visite libre de a à b.
@@ -171,10 +177,12 @@ function draw(){
   var L=PLACES.map(function(p){var c=pc(p);return {p:p,d:(me&&c)?hav(me,c):null,ex:!!(ST.pos&&ST.pos[p.id])}});
   if(me)L.sort(function(x,y){if(x.d===null&&y.d===null)return 0;if(x.d===null)return 1;if(y.d===null)return -1;return x.d-y.d});
   h+='<p class="note">'+(geo==="wait"?'Localisation en cours…':geo==="err"?'Position indisponible : autorisez la localisation du navigateur, puis rouvrez l\'onglet Lieux.':me?'Triés du plus proche au plus loin d\'après votre position.':'Ouvrez cet onglet avec la localisation activée pour trier par distance.')+'</p>';
-  L.forEach(function(o){var p=o.p;
+  function card(o){var p=o.p;
    var sub=(p.s?p.s:'')+(o.d!==null?(p.s?' · ':'')+(o.ex?'':'≈ ')+fd(o.d):(me?(p.s?' · ':'')+'position inconnue':''));
    h+='<div class="sc'+(has(ST.done,p.id)?' done':'')+'"><div class="sh"><a class="nmx" href="'+placeWeb(p)+'" target="_blank" rel="noopener">'+esc(p.n)+'<small>'+esc(sub)+'</small></a><div class="act"><a href="'+placeRoute(p)+'" target="_blank" rel="noopener" title="Itinéraire">🧭</a><button data-pos="'+p.id+'" title="Je suis sur place : enregistrer la position">📍</button><button class="ok'+(has(ST.done,p.id)?' on':'')+'" data-ok="'+p.id+'" title="Vu">✓</button></div></div></div>';
-  });
+  }
+  h+='<h2>Dans le parc</h2>';L.filter(function(o){return !o.p.h}).forEach(function(o){card(o)});
+  h+='<h2>Hôtels (Cité Nocturne)</h2>';L.filter(function(o){return o.p.h}).forEach(function(o){card(o)});
   h+='<p class="note">Lieux à visiter librement, sans horaire. 🧭 itinéraire à pied · 📍 à appuyer une fois sur place pour enregistrer la position exacte du lieu (sinon distance approximative « ≈ », ou lieu en bas de liste si inconnue) · ✓ déjà vu.</p>';
  } else {
   h+='<div class="days"><button class="'+(day==="sam"?"on":"")+'" data-day="sam">Samedi 3 oct</button><button class="'+(day==="dim"?"on":"")+'" data-day="dim">Dimanche 4 oct</button></div>';
