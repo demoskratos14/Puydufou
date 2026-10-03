@@ -43,6 +43,14 @@ a.show.must{background:var(--hi)}
 .foot button{padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:14px}
 .note{color:var(--ink);font-size:13px;margin:12px 0;padding:8px 10px;border-radius:10px;background:var(--veil)}
 h2{font-size:15px;margin:16px 2px 8px;color:var(--mut)}
+.sc{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;padding:10px}
+.sc.must{background:var(--hi)}
+.sh{display:flex;align-items:center;gap:8px}
+.nmx{flex:1;min-width:0;color:var(--ink);text-decoration:none;font-weight:600}
+.nmx small{display:block;color:var(--mut);font-weight:400;font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:15px;font-weight:600}
+.chip.on{background:var(--ok);color:#fff;border-color:var(--ok)}
 </style>
 </head>
 <body>
@@ -72,6 +80,12 @@ var SH={
  noces:{n:"Les Noces de Feu"}
 };
 var MARGIN=20;
+var DUR={signe:35,vikings:26,bal:33,lance:29,mousq:32,panache:34,mime:28,renaissance:30,epee:22,royaume:18,automates:7,carillon:10,eaux:8,frairie:32,perouse:20,verdun:15,noces:30};
+// Samedi 3 oct : programme officiel (édité à 09h18). Dimanche : relevé sur la frise horaire du site (Noces de Feu non listées). "a-b" = visite libre de a à b.
+var HOR={sam:{signe:["11:30","15:00"],vikings:["10:30","12:30","15:45","17:15"],bal:["10:45","13:15","14:45","16:15"],lance:["10:15","14:00","16:00"],mousq:["11:30","12:45","16:45","18:00"],panache:["11:00","12:15","15:30","17:15","18:30"],mime:["09:45","12:45","14:00","16:45","18:00"],renaissance:["09:30-11:45"],epee:["10:00","11:15","13:30","14:30","15:30","17:00"],royaume:["11:00-18:00"],automates:["09:45","10:30","14:00","19:15"],carillon:["11:30","14:15","16:30","18:15","19:00"],eaux:["10:00","13:00","14:00"],frairie:["16:00","17:00","19:00","20:00"],perouse:["11:45-20:00"],verdun:["10:30-19:00"],noces:["21:30"]},
+dim:{signe:["14:30"],vikings:["11:00","12:30","15:30"],bal:["10:45","13:45","16:45"],lance:["12:30","15:45"],mousq:["13:30","17:30","18:45"],panache:["10:15","11:30","14:30"],mime:["11:15","16:30","17:45"],renaissance:["09:30-11:45"],epee:["10:00","12:15","16:00","17:00"],royaume:["11:00-17:30"],automates:["09:45","14:00","18:15"],carillon:["11:45","14:15","17:15"],eaux:["10:00","13:00","14:00"],frairie:["16:15","17:15","18:15"],perouse:["11:30-18:00"],verdun:["12:00-18:00"]}};
+// Pas de lien direct vérifié : recherche limitée à puydufou.com. Pour un lien exact, ajouter w:"https://..." au spectacle dans SH.
+function web(k){var s=SH[k];return s.w||"https://www.google.com/search?q="+encodeURIComponent("site:puydufou.com "+s.n+" spectacle")}
 var PLAN=[
  {id:"s1",d:"sam",t:"11:30",n:"Arrivée, entrée, repas rapide",u:60},
  {id:"s2",d:"sam",t:"12:30",k:"vikings",u:26},
@@ -85,7 +99,7 @@ var PLAN=[
  {id:"s10",d:"sam",t:"21:30",k:"noces",u:30},
  {id:"d1",d:"dim",t:"09:30",k:"renaissance",u:30,o:"visite libre jusqu'à 11:45"},
  {id:"d2",d:"dim",t:"10:15",k:"panache",u:34},
- {id:"d3",d:"dim",t:"11:15",k:"mime",u:28,o:"horaire à confirmer"},
+ {id:"d3",d:"dim",t:"11:15",k:"mime",u:28},
  {id:"d4",d:"dim",t:"12:30",k:"lance",u:29},
  {id:"d5",d:"dim",t:"13:00",n:"Déjeuner",u:30},
  {id:"d6",d:"dim",t:"13:30",k:"mousq",u:32,o:"second passage, option"},
@@ -96,26 +110,43 @@ function ff(m){m=(m+1440)%1440;var h=Math.floor(m/60),x=m%60;return (h<10?"0":""
 function route(k){var s=SH[k];var dest=s.c?s.c.join(","):encodeURIComponent(s.n+" Puy du Fou");return "https://www.google.com/maps/dir/?api=1&destination="+dest+"&travelmode=walking"}
 var ST={done:[],del:[]};
 try{var r=localStorage.getItem("pdf-sejour");if(r){var p=JSON.parse(r);if(p&&p.done&&p.del)ST=p}}catch(e){}
+if(!ST.add)ST.add=[];
 function save(){try{localStorage.setItem("pdf-sejour",JSON.stringify(ST))}catch(e){}}
 var tab=1,day="sam";
 try{var td=new Date();if(td.getMonth()===9&&td.getDate()===4)day="dim"}catch(e){}
 function has(a,i){return a.indexOf(i)>=0}
 function toggle(a,i){var x=a.indexOf(i);if(x>=0)a.splice(x,1);else a.push(i);save();draw()}
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;")}
+var opn=null;
+function pid(d,k,t){return d+"-"+k+"-"+t}
+function baseItem(d,k,t){for(var i=0;i<PLAN.length;i++){var x=PLAN[i];if(x.d===d&&x.k===k&&x.t===t)return x}return null}
+function inPlan(d,k,t){var b=baseItem(d,k,t);if(b)return !has(ST.del,b.id);return ST.add.some(function(x){return x.id===pid(d,k,t)})}
+function setTime(k,raw){var r=raw.split("-"),t=r[0],u=r[1]?mm(r[1])-mm(t):DUR[k],b=baseItem(day,k,t);
+ if(b){toggle(ST.del,b.id);return}
+ var id=pid(day,k,t),i=-1;ST.add.forEach(function(x,j){if(x.id===id)i=j});
+ if(i>=0)ST.add.splice(i,1);else ST.add.push({id:id,d:day,t:t,k:k,u:u});save();draw()}
+function delItem(id){var i=-1;ST.add.forEach(function(x,j){if(x.id===id)i=j});if(i>=0){ST.add.splice(i,1);save();draw()}else toggle(ST.del,id)}
+function daysBar(){return '<div class="days"><button class="'+(day==="sam"?"on":"")+'" data-day="sam">Samedi 3 oct</button><button class="'+(day==="dim"?"on":"")+'" data-day="dim">Dimanche 4 oct</button></div>'}
 function draw(){
  document.getElementById("n1").className=tab===1?"on":"";
  document.getElementById("n2").className=tab===2?"on":"";
  var h="";
  if(tab===1){
-  h+='<div class="grid">';
+  h+=daysBar();
   Object.keys(SH).sort(function(a,b){return (SH[b].m||0)-(SH[a].m||0)}).forEach(function(k){
    var s=SH[k];
-   h+='<a class="show'+(s.m?' must':'')+'" href="'+route(k)+'" target="_blank" rel="noopener"><span>'+(s.m?'★ ':'')+esc(s.n)+'<small>Itinéraire à pied dans Google Maps</small></span><span class="go">🧭</span></a>';
+   h+='<div class="sc'+(s.m?' must':'')+'"><div class="sh"><a class="nmx" href="'+web(k)+'" target="_blank" rel="noopener">'+(s.m?'★ ':'')+esc(s.n)+'<small>Page sur puydufou.com</small></a><div class="act"><a href="'+route(k)+'" target="_blank" rel="noopener" title="Itinéraire">🧭</a><button data-hr="'+k+'" title="Horaires">🕒</button></div></div>';
+   if(opn===k){
+    var hs=(HOR[day]||{})[k];
+    if(!hs)h+='<p class="sub">Horaires du '+(day==="sam"?"samedi":"dimanche")+' non renseignés.</p>';
+    else{h+='<div class="chips">';hs.forEach(function(t){var r=t.split("-");h+='<button class="chip'+(inPlan(day,k,r[0])?' on':'')+'" data-tm="'+k+'|'+t+'">'+(r[1]?r[0]+' → '+r[1]:t)+'</button>'});h+='</div><p class="sub">Appuyez sur un horaire pour l\'ajouter au programme (ou le retirer).</p>'}
+   }
+   h+='</div>';
   });
-  h+='</div><p class="note">★ = vos incontournables. Les spectacles sans coordonnées sont cherchés par leur nom dans Google Maps : vérifiez que le repère est bien dans le parc.</p>';
+  h+='<p class="note">★ = vos incontournables. Le nom ouvre la page du Puy du Fou (recherche limitée à puydufou.com), 🧭 l\'itinéraire à pied, 🕒 les horaires. Samedi : programme officiel édité à 09h18. Dimanche : horaires lus sur la frise horaire du site, à quelques minutes près.</p>';
  } else {
   h+='<div class="days"><button class="'+(day==="sam"?"on":"")+'" data-day="sam">Samedi 3 oct</button><button class="'+(day==="dim"?"on":"")+'" data-day="dim">Dimanche 4 oct</button></div>';
-  var list=PLAN.filter(function(x){return x.d===day&&!has(ST.del,x.id)});
+  var list=PLAN.concat(ST.add).filter(function(x){return x.d===day&&!has(ST.del,x.id)}).sort(function(a,b){return mm(a.t)-mm(b.t)});
   var nextId=null;
   list.forEach(function(x){if(nextId===null&&!has(ST.done,x.id))nextId=x.id});
   list.forEach(function(x){
@@ -135,9 +166,11 @@ document.getElementById("app").addEventListener("click",function(e){
  var t=e.target.closest("button");if(!t)return;
  if(t.dataset.day){day=t.dataset.day;draw()}
  else if(t.dataset.ok)toggle(ST.done,t.dataset.ok);
- else if(t.dataset.del)toggle(ST.del,t.dataset.del);
+ else if(t.dataset.del)delItem(t.dataset.del);
+ else if(t.dataset.hr){opn=opn===t.dataset.hr?null:t.dataset.hr;draw()}
+ else if(t.dataset.tm){var q=t.dataset.tm.split("|");setTime(q[0],q[1])}
  else if(t.id==="rs"){ST.del=[];save();draw()}
- else if(t.id==="rz"){ST={done:[],del:[]};save();draw()}
+ else if(t.id==="rz"){ST={done:[],del:[],add:[]};save();draw()}
 });
 draw();
 </script>
