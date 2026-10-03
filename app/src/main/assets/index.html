@@ -3,14 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Puy du Fou · Mon séjour</title>
+<title>Mon Puy du Fou</title>
 <style>
-:root{--bg:#faf5ee;--card:#ffffff;--ink:#2a1d1a;--mut:#7a6a63;--acc:#7b1e2b;--hi:#fcebb8;--ok:#2e7d4f;--line:#e6dccf;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1412;--card:#2a1f1c;--ink:#f3e9e2;--mut:#b5a39a;--acc:#e07a8a;--hi:#4a3b17;--ok:#62c48a;--line:#43342f}}
-:root[data-theme="dark"]{--bg:#1b1412;--card:#2a1f1c;--ink:#f3e9e2;--mut:#b5a39a;--acc:#e07a8a;--hi:#4a3b17;--ok:#62c48a;--line:#43342f}
+:root{--bg:#faf5ee;--card:#ffffff;--ink:#2a1d1a;--mut:#7a6a63;--acc:#7b1e2b;--hi:#fcebb8;--ok:#2e7d4f;--line:#e6dccf;--veil:rgba(250,245,238,.74);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1412;--card:#2a1f1c;--ink:#f3e9e2;--mut:#b5a39a;--acc:#e07a8a;--hi:#4a3b17;--ok:#62c48a;--line:#43342f;--veil:rgba(27,20,18,.80)}}
+:root[data-theme="dark"]{--bg:#1b1412;--card:#2a1f1c;--ink:#f3e9e2;--mut:#b5a39a;--acc:#e07a8a;--hi:#4a3b17;--ok:#62c48a;--line:#43342f;--veil:rgba(27,20,18,.80)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.35}
+html{background:var(--bg)}
+body::before{content:"";position:fixed;top:0;left:0;right:0;bottom:0;z-index:-1;background:linear-gradient(var(--veil),var(--veil)),url(fond.jpg) center top/cover no-repeat}
+body{margin:0;background:transparent;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.35}
 header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--acc);color:#fff;z-index:5}
 header h1{margin:0;padding:12px 16px 6px;font-size:18px}
 nav{display:flex}
@@ -29,7 +31,7 @@ a.show.must{background:var(--hi)}
 .row.next{border:2px solid var(--acc)}
 .row.done{opacity:.5}
 .row.done .nm{text-decoration:line-through}
-.row.pause{background:transparent;border-style:dashed}
+.row.pause{background:var(--veil);border-style:dashed}
 .t{flex:none;width:54px;font-weight:700;text-align:center}
 .b{flex:1;min-width:0}
 .nm{font-weight:600}
@@ -39,13 +41,13 @@ a.show.must{background:var(--hi)}
 .act .ok.on{background:var(--ok);color:#fff;border-color:var(--ok)}
 .foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
 .foot button{padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:14px}
-.note{color:var(--mut);font-size:13px;margin:12px 2px}
+.note{color:var(--ink);font-size:13px;margin:12px 0;padding:8px 10px;border-radius:10px;background:var(--veil)}
 h2{font-size:15px;margin:16px 2px 8px;color:var(--mut)}
 </style>
 </head>
 <body>
 <header>
-  <h1>🏰 Puy du Fou · Mon séjour</h1>
+  <h1>🏰 Mon Puy du Fou</h1>
   <nav><button id="n1" class="on">Spectacles</button><button id="n2">Programme</button></nav>
 </header>
 <main id="app"></main>
