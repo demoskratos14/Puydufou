@@ -95,7 +95,23 @@ var PLACES=[
  {id:"p-h-villa",n:"La Villa Gallo-Romaine",s:"Hôtel 3★ historique (2007), style Antiquité",q:"Hôtel La Villa Gallo-Romaine Puy du Fou",h:1},
  {id:"p-h-clovis",n:"Les Îles de Clovis",s:"Huttes sur pilotis, village lacustre",q:"Hôtel Les Îles de Clovis Puy du Fou",h:1},
  {id:"p-h-drap",n:"Le Camp du Drap d'Or",s:"Hôtel 3★ Renaissance, logeries colorées",q:"Hôtel Le Camp du Drap d'Or Puy du Fou",h:1},
- {id:"p-h-lescure",n:"Le Logis de Lescure",s:"Hôtel de la Cité Nocturne",q:"Hôtel Le Logis de Lescure Puy du Fou",h:1}
+ {id:"p-h-lescure",n:"Le Logis de Lescure",s:"Hôtel de la Cité Nocturne",q:"Hôtel Le Logis de Lescure Puy du Fou",h:1},
+ {id:"p-r-auberge",n:"L'Auberge par Alexandre Couillon",s:"Restaurant gastronomique à Chasseloup (nouveauté 2026)",r:1},
+ {id:"p-r-madelon",n:"Le Café de la Madelon",s:"Repas de noces animé (1914), près du Bourg Bérard",r:1},
+ {id:"p-r-relais",n:"Le Relais de Poste",s:"Concert-repas à Chasseloup",r:1},
+ {id:"p-r-echans",n:"L'Échansonnerie",s:"Dans la cour du château",r:1},
+ {id:"p-r-taverne",n:"La Taverne",s:"Galettes bretonnes",r:1},
+ {id:"p-r-ecuyer",n:"L'Écuyer Tranchant",s:"Buffet sous la protection des chevaliers",r:1},
+ {id:"p-r-prefou",n:"La Maison du Préfou",s:"À Chasseloup, spécialité vendéenne",r:1},
+ {id:"p-r-popina",n:"La Popina",s:"Paninis et formules à emporter, près du Signe du Triomphe",c:[46.8853665,-0.9278569],r:1},
+ {id:"p-r-ambass",n:"La Table des Ambassadeurs",s:"",r:1},
+ {id:"p-r-deux",n:"Les Deux Couronnes",s:"",r:1},
+ {id:"p-r-atrium",n:"L'Atrium",s:"",r:1},
+ {id:"p-r-merovee",n:"Le Banquet de Mérovée",s:"",r:1},
+ {id:"p-r-mijot",n:"La Mijoterie du Roy Henry",s:"",r:1},
+ {id:"p-r-orang",n:"L'Orangerie",s:"",r:1},
+ {id:"p-r-bistrot",n:"Le Bistrot",s:"",r:1},
+ {id:"p-r-ventres",n:"Le Rendez-vous des Ventres Faims",s:"",r:1}
 ];
 var me=null,geo="";
 function hav(a,b){var R=6371000,r=Math.PI/180,dl=(b[0]-a[0])*r,dg=(b[1]-a[1])*r,x=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(dg/2)*Math.sin(dg/2);return 2*R*Math.asin(Math.sqrt(x))}
@@ -181,7 +197,8 @@ function draw(){
    var sub=(p.s?p.s:'')+(o.d!==null?(p.s?' · ':'')+(o.ex?'':'≈ ')+fd(o.d):(me?(p.s?' · ':'')+'position inconnue':''));
    h+='<div class="sc'+(has(ST.done,p.id)?' done':'')+'"><div class="sh"><a class="nmx" href="'+placeWeb(p)+'" target="_blank" rel="noopener">'+esc(p.n)+'<small>'+esc(sub)+'</small></a><div class="act"><a href="'+placeRoute(p)+'" target="_blank" rel="noopener" title="Itinéraire">🧭</a><button data-pos="'+p.id+'" title="Je suis sur place : enregistrer la position">📍</button><button class="ok'+(has(ST.done,p.id)?' on':'')+'" data-ok="'+p.id+'" title="Vu">✓</button></div></div></div>';
   }
-  h+='<h2>Dans le parc</h2>';L.filter(function(o){return !o.p.h}).forEach(function(o){card(o)});
+  h+='<h2>Dans le parc</h2>';L.filter(function(o){return !o.p.h&&!o.p.r}).forEach(function(o){card(o)});
+  h+='<h2>Restaurants</h2><p class="sub" style="margin:0 2px 8px">Souvent complets : réserver tôt. Liste d\'après le site du parc, à confirmer sur place (certains sont fermés hors saison).</p>';L.filter(function(o){return o.p.r}).forEach(function(o){card(o)});
   h+='<h2>Hôtels (Cité Nocturne)</h2>';L.filter(function(o){return o.p.h}).forEach(function(o){card(o)});
   h+='<p class="note">Lieux à visiter librement, sans horaire. 🧭 itinéraire à pied · 📍 à appuyer une fois sur place pour enregistrer la position exacte du lieu (sinon distance approximative « ≈ », ou lieu en bas de liste si inconnue) · ✓ déjà vu.</p>';
  } else {
