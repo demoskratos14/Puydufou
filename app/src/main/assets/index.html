@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="fr" data-theme-auto>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Puy du Fou · Mon séjour</title>
+<style>
+:root{--bg:#faf5ee;--card:#ffffff;--ink:#2a1d1a;--mut:#7a6a63;--acc:#7b1e2b;--hi:#fcebb8;--ok:#2e7d4f;--line:#e6dccf;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1412;--card:#2a1f1c;--ink:#f3e9e2;--mut:#b5a39a;--acc:#e07a8a;--hi:#4a3b17;--ok:#62c48a;--line:#43342f}}
+:root[data-theme="dark"]{--bg:#1b1412;--card:#2a1f1c;--ink:#f3e9e2;--mut:#b5a39a;--acc:#e07a8a;--hi:#4a3b17;--ok:#62c48a;--line:#43342f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.35}
+header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--acc);color:#fff;z-index:5}
+header h1{margin:0;padding:12px 16px 6px;font-size:18px}
+nav{display:flex}
+nav button{flex:1;padding:12px 8px;border:0;background:transparent;color:#fff;font-size:15px;font-weight:600;opacity:.7;border-bottom:3px solid transparent}
+nav button.on{opacity:1;border-bottom-color:#fff}
+main{padding:12px 12px 40px;max-width:640px;margin:0 auto}
+.days{display:flex;gap:8px;margin-bottom:12px}
+.days button{flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:15px;font-weight:600}
+.days button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.grid{display:grid;grid-template-columns:1fr;gap:8px}
+a.show{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;color:var(--ink);text-decoration:none;font-weight:600}
+a.show small{display:block;color:var(--mut);font-weight:400;font-size:13px}
+a.show.must{background:var(--hi)}
+.go{flex:none;font-size:20px}
+.row{display:flex;gap:10px;align-items:center;padding:10px;margin-bottom:8px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.row.next{border:2px solid var(--acc)}
+.row.done{opacity:.5}
+.row.done .nm{text-decoration:line-through}
+.row.pause{background:transparent;border-style:dashed}
+.t{flex:none;width:54px;font-weight:700;text-align:center}
+.b{flex:1;min-width:0}
+.nm{font-weight:600}
+.sub{font-size:13px;color:var(--mut)}
+.act{display:flex;gap:6px;flex:none}
+.act a,.act button{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:18px;display:flex;align-items:center;justify-content:center;text-decoration:none;padding:0}
+.act .ok.on{background:var(--ok);color:#fff;border-color:var(--ok)}
+.foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.foot button{padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:14px}
+.note{color:var(--mut);font-size:13px;margin:12px 2px}
+h2{font-size:15px;margin:16px 2px 8px;color:var(--mut)}
+</style>
+</head>
+<body>
+<header>
+  <h1>🏰 Puy du Fou · Mon séjour</h1>
+  <nav><button id="n1" class="on">Spectacles</button><button id="n2">Programme</button></nav>
+</header>
+<main id="app"></main>
+<script>
+var SH={
+ signe:{n:"Le Signe du Triomphe",c:[46.8853665,-0.9278569],m:1},
+ vikings:{n:"Les Vikings",c:[46.8865132,-0.9293841],m:1},
+ bal:{n:"Le Bal des Oiseaux Fantômes",m:1},
+ mousq:{n:"Mousquetaire de Richelieu",c:[46.8930976,-0.9338312],m:1},
+ epee:{n:"L'Épée du Roi Arthur",m:1},
+ lance:{n:"Le Secret de la Lance",c:[46.8913449,-0.9312177]},
+ panache:{n:"Le Dernier Panache"},
+ mime:{n:"Le Mime et l'Étoile"},
+ renaissance:{n:"La Renaissance du Château"},
+ royaume:{n:"Le Premier Royaume"},
+ automates:{n:"Les Automates Musiciens"},
+ carillon:{n:"Le Grand Carillon"},
+ eaux:{n:"Les Grandes Eaux"},
+ frairie:{n:"La Frairie de la Toussaint"},
+ perouse:{n:"Le Mystère de la Pérouse"},
+ verdun:{n:"Les Amoureux de Verdun"},
+ noces:{n:"Les Noces de Feu"}
+};
+var MARGIN=20;
+var PLAN=[
+ {id:"s1",d:"sam",t:"11:30",n:"Arrivée, entrée, repas rapide",u:60},
+ {id:"s2",d:"sam",t:"12:30",k:"vikings",u:26},
+ {id:"s3",d:"sam",t:"13:30",k:"epee",u:22},
+ {id:"s4",d:"sam",t:"14:00",n:"Pause déjeuner",u:40},
+ {id:"s5",d:"sam",t:"15:00",k:"signe",u:35},
+ {id:"s6",d:"sam",t:"16:15",k:"bal",u:33},
+ {id:"s7",d:"sam",t:"16:50",n:"Pause, balade, dîner tôt",u:70},
+ {id:"s8",d:"sam",t:"18:00",k:"mousq",u:32},
+ {id:"s9",d:"sam",t:"19:00",k:"frairie",u:32,o:"option (ou 20:00)"},
+ {id:"s10",d:"sam",t:"21:30",k:"noces",u:30},
+ {id:"d1",d:"dim",t:"09:30",k:"renaissance",u:30,o:"visite libre jusqu'à 11:45"},
+ {id:"d2",d:"dim",t:"10:15",k:"panache",u:34},
+ {id:"d3",d:"dim",t:"11:15",k:"mime",u:28,o:"horaire à confirmer"},
+ {id:"d4",d:"dim",t:"12:30",k:"lance",u:29},
+ {id:"d5",d:"dim",t:"13:00",n:"Déjeuner",u:30},
+ {id:"d6",d:"dim",t:"13:30",k:"mousq",u:32,o:"second passage, option"},
+ {id:"d7",d:"dim",t:"15:30",n:"Départ du parc au plus tard",u:30}
+];
+function mm(s){var a=s.split(":");return +a[0]*60+ +a[1]}
+function ff(m){m=(m+1440)%1440;var h=Math.floor(m/60),x=m%60;return (h<10?"0":"")+h+":"+(x<10?"0":"")+x}
+function route(k){var s=SH[k];var dest=s.c?s.c.join(","):encodeURIComponent(s.n+" Puy du Fou");return "https://www.google.com/maps/dir/?api=1&destination="+dest+"&travelmode=walking"}
+var ST={done:[],del:[]};
+try{var r=localStorage.getItem("pdf-sejour");if(r){var p=JSON.parse(r);if(p&&p.done&&p.del)ST=p}}catch(e){}
+function save(){try{localStorage.setItem("pdf-sejour",JSON.stringify(ST))}catch(e){}}
+var tab=1,day="sam";
+try{var td=new Date();if(td.getMonth()===9&&td.getDate()===4)day="dim"}catch(e){}
+function has(a,i){return a.indexOf(i)>=0}
+function toggle(a,i){var x=a.indexOf(i);if(x>=0)a.splice(x,1);else a.push(i);save();draw()}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;")}
+function draw(){
+ document.getElementById("n1").className=tab===1?"on":"";
+ document.getElementById("n2").className=tab===2?"on":"";
+ var h="";
+ if(tab===1){
+  h+='<div class="grid">';
+  Object.keys(SH).sort(function(a,b){return (SH[b].m||0)-(SH[a].m||0)}).forEach(function(k){
+   var s=SH[k];
+   h+='<a class="show'+(s.m?' must':'')+'" href="'+route(k)+'" target="_blank" rel="noopener"><span>'+(s.m?'★ ':'')+esc(s.n)+'<small>Itinéraire à pied dans Google Maps</small></span><span class="go">🧭</span></a>';
+  });
+  h+='</div><p class="note">★ = vos incontournables. Les spectacles sans coordonnées sont cherchés par leur nom dans Google Maps : vérifiez que le repère est bien dans le parc.</p>';
+ } else {
+  h+='<div class="days"><button class="'+(day==="sam"?"on":"")+'" data-day="sam">Samedi 3 oct</button><button class="'+(day==="dim"?"on":"")+'" data-day="dim">Dimanche 4 oct</button></div>';
+  var list=PLAN.filter(function(x){return x.d===day&&!has(ST.del,x.id)});
+  var nextId=null;
+  list.forEach(function(x){if(nextId===null&&!has(ST.done,x.id))nextId=x.id});
+  list.forEach(function(x){
+   var s=x.k?SH[x.k]:null,nm=s?s.n:x.n,st=mm(x.t);
+   var sub=(s?'Y être à '+ff(st-MARGIN)+' · ':'')+'fin '+ff(st+x.u)+(x.o?' · '+x.o:'');
+   h+='<div class="row'+(s?'':' pause')+(has(ST.done,x.id)?' done':'')+(x.id===nextId?' next':'')+'"><div class="t">'+x.t+'</div><div class="b"><div class="nm">'+(s&&s.m?'★ ':'')+esc(nm)+'</div><div class="sub">'+esc(sub)+'</div></div><div class="act">'+(s?'<a href="'+route(x.k)+'" target="_blank" rel="noopener" title="Itinéraire">🧭</a>':'')+'<button class="ok'+(has(ST.done,x.id)?' on':'')+'" data-ok="'+x.id+'" title="Fait">✓</button><button data-del="'+x.id+'" title="Supprimer">🗑</button></div></div>';
+  });
+  var nd=ST.del.length;
+  h+='<div class="foot">'+(nd?'<button id="rs">Restaurer les éléments supprimés ('+nd+')</button>':'')+'<button id="rz">Tout remettre à zéro</button></div>';
+  h+='<p class="note">✓ marque un spectacle comme fait, 🗑 le retire du programme (réversible avec « Restaurer »). Le cadre rouge indique le prochain à faire.</p>';
+ }
+ document.getElementById("app").innerHTML=h;
+}
+document.getElementById("n1").onclick=function(){tab=1;draw()};
+document.getElementById("n2").onclick=function(){tab=2;draw()};
+document.getElementById("app").addEventListener("click",function(e){
+ var t=e.target.closest("button");if(!t)return;
+ if(t.dataset.day){day=t.dataset.day;draw()}
+ else if(t.dataset.ok)toggle(ST.done,t.dataset.ok);
+ else if(t.dataset.del)toggle(ST.del,t.dataset.del);
+ else if(t.id==="rs"){ST.del=[];save();draw()}
+ else if(t.id==="rz"){ST={done:[],del:[]};save();draw()}
+});
+draw();
+</script>
+</body>
+</html>
