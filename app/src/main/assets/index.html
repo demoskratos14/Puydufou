@@ -56,7 +56,7 @@ h2{font-size:15px;margin:16px 2px 8px;color:var(--mut)}
 <body>
 <header>
   <h1>🏰 Mon Puy du Fou</h1>
-  <nav><button id="n1" class="on">Spectacles</button><button id="n2">Programme</button></nav>
+  <nav><button id="n1" class="on">Spectacles</button><button id="n2">Programme</button><button id="n3">Lieux</button></nav>
 </header>
 <main id="app"></main>
 <script>
@@ -79,6 +79,27 @@ var SH={
  verdun:{w:"https://www.puydufou.com/france/fr/les-amoureux-de-verdun",n:"Les Amoureux de Verdun"},
  noces:{w:"https://www.puydufou.com/france/fr/les-noces-de-feu",n:"Les Noces de Feu"}
 };
+var PLACES=[
+ {id:"p-fontaine",n:"Le Monde Imaginaire de La Fontaine",s:"Espace enfants, près du Labyrinthe des Animaux",w:"https://www.puydufou.com/france/fr/le-monde-imaginaire-de-la-fontaine",c:[46.8913449,-0.9312177]},
+ {id:"p-labyrinthe",n:"Le Labyrinthe des Animaux",s:"Labyrinthe végétal au bord du lac, les statues arrosent",w:"https://www.puydufou.com/france/fr/le-labyrinthe-des-animaux",c:[46.8913449,-0.9312177]},
+ {id:"p-repaire",n:"Le Repaire des Enfants",s:"Château à taille d'enfant",w:"https://www.puydufou.com/france/fr/le-repaire-des-enfants",c:[46.8913449,-0.9312177]},
+ {id:"p-jets",n:"Les Jets Sauteurs",s:"Espace enfants, près du Labyrinthe des Animaux",w:"https://www.puydufou.com/france/fr/les-jets-sauteurs",c:[46.8913449,-0.9312177]},
+ {id:"p-marienne",n:"Le Val de la Marienne",s:"",w:"https://www.puydufou.com/france/fr/le-val-de-la-marienne"},
+ {id:"p-roseraie",n:"La Roseraie de Ronsard",s:"",w:"https://www.puydufou.com/france/fr/la-roseraie-de-ronsard"},
+ {id:"p-fort",n:"Saint-Philbert-le-Vieil",s:"Ancien Fort de l'An Mil",w:"https://www.puydufou.com/france/fr/saint-philbert-le-vieil",c:[46.8865132,-0.9293841]},
+ {id:"p-cite",n:"Font-Rognou",s:"Ancienne Cité Médiévale : bâtiments et métiers du Moyen Âge",w:"https://www.puydufou.com/france/fr/font-rognou"},
+ {id:"p-village",n:"Chasseloup",s:"Ancien Village XVIIIe siècle",w:"https://www.puydufou.com/france/fr/chasseloup"},
+ {id:"p-bourg",n:"Le Bourg Bérard",s:"Ancien Bourg 1900",w:"https://www.puydufou.com/france/fr/le-bourg-berard"}
+];
+var me=null,geo="";
+function hav(a,b){var R=6371000,r=Math.PI/180,dl=(b[0]-a[0])*r,dg=(b[1]-a[1])*r,x=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(dg/2)*Math.sin(dg/2);return 2*R*Math.asin(Math.sqrt(x))}
+function pc(p){return (ST.pos&&ST.pos[p.id])||p.c||null}
+function getPos(cb){if(!navigator.geolocation){geo="err";draw();return}
+ geo="wait";draw();
+ navigator.geolocation.getCurrentPosition(function(g){me=[g.coords.latitude,g.coords.longitude];geo="ok";if(cb)cb(me);draw()},function(){geo="err";draw()},{enableHighAccuracy:true,timeout:10000,maximumAge:0})}
+function fd(m){return m<1000?Math.max(10,Math.round(m/10)*10)+" m":(m/1000).toFixed(1)+" km"}
+function placeRoute(p){return "https://www.google.com/maps/dir/?api=1&destination="+(p.c?p.c.join(","):encodeURIComponent(p.n+" Puy du Fou"))+"&travelmode=walking"}
+function placeWeb(p){return p.w||"https://www.google.com/search?q="+encodeURIComponent("site:puydufou.com "+p.n)}
 var MARGIN=20;
 var DUR={signe:35,vikings:26,bal:33,lance:29,mousq:32,panache:34,mime:28,renaissance:30,epee:22,royaume:18,automates:7,carillon:10,eaux:8,frairie:32,perouse:20,verdun:15,noces:30};
 // Samedi 3 oct : programme officiel (édité à 09h18). Dimanche : relevé sur la frise horaire du site (Noces de Feu non listées). "a-b" = visite libre de a à b.
@@ -111,6 +132,7 @@ function route(k){var s=SH[k];var dest=s.c?s.c.join(","):encodeURIComponent(s.n+
 var ST={done:[],del:[]};
 try{var r=localStorage.getItem("pdf-sejour");if(r){var p=JSON.parse(r);if(p&&p.done&&p.del)ST=p}}catch(e){}
 if(!ST.add)ST.add=[];
+if(!ST.pos)ST.pos={};
 function save(){try{localStorage.setItem("pdf-sejour",JSON.stringify(ST))}catch(e){}}
 var tab=1,day="sam";
 try{var td=new Date();if(td.getMonth()===9&&td.getDate()===4)day="dim"}catch(e){}
@@ -130,6 +152,7 @@ function daysBar(){return '<div class="days"><button class="'+(day==="sam"?"on":
 function draw(){
  document.getElementById("n1").className=tab===1?"on":"";
  document.getElementById("n2").className=tab===2?"on":"";
+ document.getElementById("n3").className=tab===3?"on":"";
  var h="";
  if(tab===1){
   h+=daysBar();
@@ -144,6 +167,15 @@ function draw(){
    h+='</div>';
   });
   h+='<p class="note">★ = vos incontournables. Le nom ouvre la page du spectacle sur puydufou.com, 🧭 l\'itinéraire à pied, 🕒 les horaires. Samedi : programme officiel édité à 09h18. Dimanche : horaires lus sur la frise horaire du site, à quelques minutes près.</p>';
+ } else if(tab===3){
+  var L=PLACES.map(function(p){var c=pc(p);return {p:p,d:(me&&c)?hav(me,c):null,ex:!!(ST.pos&&ST.pos[p.id])}});
+  if(me)L.sort(function(x,y){if(x.d===null&&y.d===null)return 0;if(x.d===null)return 1;if(y.d===null)return -1;return x.d-y.d});
+  h+='<p class="note">'+(geo==="wait"?'Localisation en cours…':geo==="err"?'Position indisponible : autorisez la localisation du navigateur, puis rouvrez l\'onglet Lieux.':me?'Triés du plus proche au plus loin d\'après votre position.':'Ouvrez cet onglet avec la localisation activée pour trier par distance.')+'</p>';
+  L.forEach(function(o){var p=o.p;
+   var sub=(p.s?p.s:'')+(o.d!==null?(p.s?' · ':'')+(o.ex?'':'≈ ')+fd(o.d):(me?(p.s?' · ':'')+'position inconnue':''));
+   h+='<div class="sc'+(has(ST.done,p.id)?' done':'')+'"><div class="sh"><a class="nmx" href="'+placeWeb(p)+'" target="_blank" rel="noopener">'+esc(p.n)+'<small>'+esc(sub)+'</small></a><div class="act"><a href="'+placeRoute(p)+'" target="_blank" rel="noopener" title="Itinéraire">🧭</a><button data-pos="'+p.id+'" title="Je suis sur place : enregistrer la position">📍</button><button class="ok'+(has(ST.done,p.id)?' on':'')+'" data-ok="'+p.id+'" title="Vu">✓</button></div></div></div>';
+  });
+  h+='<p class="note">Lieux à visiter librement, sans horaire. 🧭 itinéraire à pied · 📍 à appuyer une fois sur place pour enregistrer la position exacte du lieu (sinon distance approximative « ≈ », ou lieu en bas de liste si inconnue) · ✓ déjà vu.</p>';
  } else {
   h+='<div class="days"><button class="'+(day==="sam"?"on":"")+'" data-day="sam">Samedi 3 oct</button><button class="'+(day==="dim"?"on":"")+'" data-day="dim">Dimanche 4 oct</button></div>';
   var list=PLAN.concat(ST.add).filter(function(x){return x.d===day&&!has(ST.del,x.id)}).sort(function(a,b){return mm(a.t)-mm(b.t)});
@@ -162,15 +194,17 @@ function draw(){
 }
 document.getElementById("n1").onclick=function(){tab=1;draw()};
 document.getElementById("n2").onclick=function(){tab=2;draw()};
+document.getElementById("n3").onclick=function(){tab=3;draw();getPos()};
 document.getElementById("app").addEventListener("click",function(e){
  var t=e.target.closest("button");if(!t)return;
  if(t.dataset.day){day=t.dataset.day;draw()}
  else if(t.dataset.ok)toggle(ST.done,t.dataset.ok);
  else if(t.dataset.del)delItem(t.dataset.del);
+ else if(t.dataset.pos){var pid2=t.dataset.pos;getPos(function(m){ST.pos[pid2]=m;save()})}
  else if(t.dataset.hr){opn=opn===t.dataset.hr?null:t.dataset.hr;draw()}
  else if(t.dataset.tm){var q=t.dataset.tm.split("|");setTime(q[0],q[1])}
  else if(t.id==="rs"){ST.del=[];save();draw()}
- else if(t.id==="rz"){ST={done:[],del:[],add:[]};save();draw()}
+ else if(t.id==="rz"){ST={done:[],del:[],add:[],pos:ST.pos||{}};save();draw()}
 });
 draw();
 </script>
