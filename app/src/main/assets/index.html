@@ -164,6 +164,10 @@ function has(a,i){return a.indexOf(i)>=0}
 function toggle(a,i){var x=a.indexOf(i);if(x>=0)a.splice(x,1);else a.push(i);save();draw()}
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;")}
 var opn=null;
+function items(k){return PLAN.concat(ST.add).filter(function(x){return x.k===k&&!has(ST.del,x.id)})}
+function seen(k){return has(ST.done,'v-'+k)||items(k).some(function(x){return has(ST.done,x.id)})}
+function pl(k){return items(k).sort(function(x,y){return (x.d===y.d?0:x.d==="sam"?-1:1)||mm(x.t)-mm(y.t)}).map(function(x){return (x.d==="sam"?"sam ":"dim ")+x.t}).join(", ")}
+function toggleSeen(k){if(seen(k)){var ids=items(k).map(function(x){return x.id});ST.done=ST.done.filter(function(i){return i!=='v-'+k&&ids.indexOf(i)<0})}else ST.done.push('v-'+k);save();draw()}
 function pid(d,k,t){return d+"-"+k+"-"+t}
 function baseItem(d,k,t){for(var i=0;i<PLAN.length;i++){var x=PLAN[i];if(x.d===d&&x.k===k&&x.t===t)return x}return null}
 function inPlan(d,k,t){var b=baseItem(d,k,t);if(b)return !has(ST.del,b.id);return ST.add.some(function(x){return x.id===pid(d,k,t)})}
@@ -180,11 +184,11 @@ function draw(){
  var h="";
  if(tab===1){
   h+=daysBar();
-  var ks=Object.keys(SH),nd=ks.filter(function(k){return has(ST.done,'v-'+k)}).length,mr=ks.filter(function(k){return SH[k].m&&!has(ST.done,'v-'+k)}).length;
+  var ks=Object.keys(SH),nd=ks.filter(seen).length,mr=ks.filter(function(k){return SH[k].m&&!seen(k)}).length;
   h+='<p class="note">Vus : '+nd+' / '+ks.length+' · incontournables restants : '+mr+'</p>';
-  ks.sort(function(a,b){return (has(ST.done,'v-'+a)?1:0)-(has(ST.done,'v-'+b)?1:0)||(SH[b].m||0)-(SH[a].m||0)}).forEach(function(k){
-   var s=SH[k],dn=has(ST.done,'v-'+k);
-   h+='<div class="sc'+(s.m?' must':'')+(dn?' done':'')+'"><div class="sh"><a class="nmx" href="'+web(k)+'" target="_blank" rel="noopener">'+(s.m?'★ ':'')+esc(s.n)+'<small>Page sur puydufou.com</small></a><div class="act"><a href="'+route(k)+'" target="_blank" rel="noopener" title="Itinéraire">🧭</a><button data-hr="'+k+'" title="Horaires">🕒</button><button class="ok'+(dn?' on':'')+'" data-ok="v-'+k+'" title="Vu">✓</button></div></div>';
+  ks.sort(function(a,b){return (seen(a)?1:0)-(seen(b)?1:0)||(SH[b].m||0)-(SH[a].m||0)}).forEach(function(k){
+   var s=SH[k],dn=seen(k);
+   h+='<div class="sc'+(s.m?' must':'')+(dn?' done':'')+'"><div class="sh"><a class="nmx" href="'+web(k)+'" target="_blank" rel="noopener">'+(s.m?'★ ':'')+esc(s.n)+'<small>Page sur puydufou.com'+(pl(k)?' · 📅 '+pl(k):'')+'</small></a><div class="act"><a href="'+route(k)+'" target="_blank" rel="noopener" title="Itinéraire">🧭</a><button data-hr="'+k+'" title="Horaires">🕒</button><button class="ok'+(dn?' on':'')+'" data-ok="v-'+k+'" title="Vu">✓</button></div></div>';
    if(opn===k){
     var hs=(HOR[day]||{})[k];
     if(!hs)h+='<p class="sub">Horaires du '+(day==="sam"?"samedi":"dimanche")+' non renseignés.</p>';
@@ -192,7 +196,7 @@ function draw(){
    }
    h+='</div>';
   });
-  h+='<p class="note">★ = vos incontournables. Le nom ouvre la page du spectacle sur puydufou.com, 🧭 l\'itinéraire à pied, 🕒 les horaires, ✓ pour cocher un spectacle vu (les vus passent en bas de liste). Samedi : programme officiel édité à 09h18. Dimanche : horaires lus sur la frise horaire du site, à quelques minutes près.</p>';
+  h+='<p class="note">★ = vos incontournables. Le nom ouvre la page du spectacle sur puydufou.com, 🧭 l\'itinéraire à pied, 🕒 les horaires, ✓ pour cocher un spectacle vu (les vus passent en bas de liste ; un spectacle validé dans le Programme est aussi marqué vu), 📅 = déjà au programme (jour et heure). Samedi : programme officiel édité à 09h18. Dimanche : horaires lus sur la frise horaire du site, à quelques minutes près.</p>';
  } else if(tab===3){
   var L=PLACES.map(function(p){var c=pc(p);return {p:p,d:(me&&c)?hav(me,c):null,ex:!!(ST.pos&&ST.pos[p.id])}});
   if(me)L.sort(function(x,y){if(x.d===null&&y.d===null)return 0;if(x.d===null)return 1;if(y.d===null)return -1;return x.d-y.d});
@@ -227,7 +231,7 @@ document.getElementById("n3").onclick=function(){tab=3;draw();getPos()};
 document.getElementById("app").addEventListener("click",function(e){
  var t=e.target.closest("button");if(!t)return;
  if(t.dataset.day){day=t.dataset.day;draw()}
- else if(t.dataset.ok)toggle(ST.done,t.dataset.ok);
+ else if(t.dataset.ok){var o=t.dataset.ok;if(o.indexOf("v-")===0)toggleSeen(o.slice(2));else toggle(ST.done,o)}
  else if(t.dataset.del)delItem(t.dataset.del);
  else if(t.dataset.pos){var pid2=t.dataset.pos;getPos(function(m){ST.pos[pid2]=m;save()})}
  else if(t.dataset.hr){opn=opn===t.dataset.hr?null:t.dataset.hr;draw()}
