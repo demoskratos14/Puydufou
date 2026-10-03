@@ -98,7 +98,7 @@ function getPos(cb){if(!navigator.geolocation){geo="err";draw();return}
  geo="wait";draw();
  navigator.geolocation.getCurrentPosition(function(g){me=[g.coords.latitude,g.coords.longitude];geo="ok";if(cb)cb(me);draw()},function(){geo="err";draw()},{enableHighAccuracy:true,timeout:10000,maximumAge:0})}
 function fd(m){return m<1000?Math.max(10,Math.round(m/10)*10)+" m":(m/1000).toFixed(1)+" km"}
-function placeRoute(p){return "https://www.google.com/maps/dir/?api=1&destination="+(p.c?p.c.join(","):encodeURIComponent(p.n+" Puy du Fou"))+"&travelmode=walking"}
+function placeRoute(p){return "https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent("Puy du Fou "+p.n)+"&travelmode=walking"}
 function placeWeb(p){return p.w||"https://www.google.com/search?q="+encodeURIComponent("site:puydufou.com "+p.n)}
 var MARGIN=20;
 var DUR={signe:35,vikings:26,bal:33,lance:29,mousq:32,panache:34,mime:28,renaissance:30,epee:22,royaume:18,automates:7,carillon:10,eaux:8,frairie:32,perouse:20,verdun:15,noces:30};
