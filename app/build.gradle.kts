@@ -9,29 +9,12 @@ android {
 
     defaultConfig {
         applicationId = "com.sejour.puydufou"
-        minSdk = 26
+        minSdk = 24
         targetSdk = 34
-        // Le numéro de version augmente à chaque build GitHub : une nouvelle version s'installe par-dessus l'ancienne
-        val run = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInt()
-        versionCode = run
-        versionName = "1.$run"
+        versionCode = 1
+        versionName = "1.0"
     }
 
-    // Clé de signature fixe (fichier debug.keystore du dépôt) : toutes les versions ont la même signature
-    signingConfigs {
-        getByName("debug") {
-            storeFile = file("debug.keystore")
-            storePassword = "android"
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
-        }
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -39,4 +22,9 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+}
+
+dependencies {
+    implementation("androidx.activity:activity-ktx:1.9.0")
+    implementation("androidx.webkit:webkit:1.11.0")
 }
